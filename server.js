@@ -1,13 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { ConnectDB } from './config/db';
+import {ConnectDB}  from './config/db.js';
 
 
 dotenv.config();
 
 const app = express();
 
-console.log('MongoDB URI: ', process.env.MONGODB_URI);
 
 app.get('/', (req,res) =>{
     res.send("Hello world")
