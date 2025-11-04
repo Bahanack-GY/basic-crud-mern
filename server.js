@@ -1,8 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import {ConnectDB}  from './config/db.js';
-import Product from './models/product.model.js';
-
+import os from 'os';
+import productRoutes from './routes/product.route.js';
 
 dotenv.config();
 
@@ -10,27 +10,16 @@ const app = express();
 app.use(express.json());
 
 
-app.get('/', (req,res) =>{
-    res.send("Hello world")
+app.get('/health', (req,res) =>{
+    res.status(200).send({status: 'UP', host: os.hostname(), time: new Date() , uptime: os.uptime(),   });
 })
 
-app.post('/product', async (req, res) =>{
-    const product = req.body;
-    if(!product.name || !product.price){
-        return  res.status(400).send({message: "Name and Price are required"});
-    }
-
-    const newProduct = new Product(product);
-    try{
-        await newProduct.save();
-        res.status(201).json({message: "Product created successfully", product: newProduct});
-        console.log('New product created:', newProduct);
-    }
-    catch(error){
-        console.error('Error saving product:', error);
-        res.status(500).send({message: "Error saving product"});
-    }
+app.use('/api',  (req,res,next) =>{
+    console.log(`Incoming request: ${req.method} ${req.url} at ${new Date().toISOString()} status: ${res.statusCode}`);
+    next();
 });
+app.use('/api/products', productRoutes);  
+
 
 app.listen(3000, ()=>{
     ConnectDB();
